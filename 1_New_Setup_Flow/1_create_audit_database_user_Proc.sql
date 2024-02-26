@@ -1,4 +1,11 @@
--- Create audit database, user and grants
+-- Function -->
+-- Create audit database, table, user and grants
+
+-- Run Instructions -->
+-- Run as root user within mysql database (Other DB can also be used, as procedure can be removed post setup)
+-- Call the procedure without any parameters, use decaled/hard-coded parameters to change any names
+
+-- Post run Instructions
 -- Need to manually drop the procedure once completed
 
 
@@ -16,13 +23,13 @@ BEGIN
     SET @password := 'Aud!tMgr#45big';
 
     -- Create database
-    SET @sql_query := CONCAT('CREATE DATABASE ', @db_name);
+    SET @sql_query := CONCAT('CREATE DATABASE IF NOT EXISTS ', @db_name);
     PREPARE stmt FROM @sql_query;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
 
     -- Create user
-    SET @sql_query := CONCAT('CREATE USER ''', @username, '''@''%'' IDENTIFIED BY ''', @password, '''');
+    SET @sql_query := CONCAT('CREATE USER IF NOT EXISTS ''', @username, '''@''%'' IDENTIFIED BY ''', @password, '''');
     PREPARE stmt FROM @sql_query;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
@@ -35,6 +42,21 @@ BEGIN
 
     -- Flush privileges
     FLUSH PRIVILEGES;
+
+    -- Create audit_meta_data table
+    SET @sql_query := '
+    CREATE TABLE IF NOT EXISTS audit.audit_meta_data (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        table_schema VARCHAR(255),
+        table_name VARCHAR(255),
+        added_date DATETIME,
+        is_insert TINYINT(1),
+        is_delete TINYINT(1),
+        is_update TINYINT(1)
+    )';
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
 
     SELECT 'Database, user, and privileges created successfully.';
 END//
