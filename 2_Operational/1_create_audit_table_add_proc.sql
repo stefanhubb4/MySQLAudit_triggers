@@ -1,3 +1,14 @@
+-- Function -->
+-- Add tables being audited to meta data table
+
+-- Run Instructions -->
+-- Run as root user within audit database created during setup
+-- Call the procedure with full table name to add it to auditing along with audit database name e.g --> call create_audit_table('audit' , 'hr.salary');
+
+-- Post run Instructions -->
+-- 
+
+
 DELIMITER //
 
 CREATE PROCEDURE create_audit_table(IN db_name VARCHAR(255), IN full_table_name VARCHAR(255))
@@ -36,7 +47,6 @@ BEGIN
 
     SET @alter_query = CONCAT('ALTER TABLE ', audit_table_name, '
         ADD COLUMN id_', random_suffix, ' INT AUTO_INCREMENT PRIMARY KEY,
-        ADD COLUMN audit_id_', random_suffix, ' INT,
         ADD COLUMN `datetime_', random_suffix, '` DATETIME,
         ADD COLUMN `user_', random_suffix, '` VARCHAR(255),
         ADD COLUMN `host_', random_suffix, '` VARCHAR(255),
@@ -56,9 +66,9 @@ END //
 
 DELIMITER ;
 
-###
+-- ###
 
-CALL create_audit_table('audit', 'test.product');
+-- CALL create_audit_table('audit', 'test.product');
 
-###
+-- ###
 

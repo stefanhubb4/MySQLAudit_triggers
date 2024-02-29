@@ -1,3 +1,14 @@
+-- Function -->
+-- Add tables being audited to meta data table
+
+-- Run Instructions -->
+-- Run as root user within audit database created during setup
+-- Call the procedure with full table name to add it to auditing along with audit database name e.g --> call create_audit_table('audit' , 'hr.salary');
+
+-- Post run Instructions -->
+-- 
+
+
 DELIMITER //
 
 CREATE PROCEDURE create_audit_table(IN db_name VARCHAR(255), IN full_table_name VARCHAR(255))
@@ -7,7 +18,7 @@ BEGIN
     DECLARE meta_table_name VARCHAR(255);
     DECLARE audit_table_name VARCHAR(255);
     DECLARE sql_query VARCHAR(1000);
-    DECLARE random_suffix VARCHAR(3);
+    DECLARE random_suffix VARCHAR(10);
     DECLARE current_datetime DATETIME;
 
     -- Set current datetime
@@ -32,11 +43,10 @@ BEGIN
     DEALLOCATE PREPARE stmt;
 
     -- Add additional columns
-    SET random_suffix = LPAD(FLOOR(RAND() * 1000), 3, '0');
+    SET random_suffix = 'trigtrack';
 
     SET @alter_query = CONCAT('ALTER TABLE ', audit_table_name, '
         ADD COLUMN id_', random_suffix, ' INT AUTO_INCREMENT PRIMARY KEY,
-        ADD COLUMN audit_id_', random_suffix, ' INT,
         ADD COLUMN `datetime_', random_suffix, '` DATETIME,
         ADD COLUMN `user_', random_suffix, '` VARCHAR(255),
         ADD COLUMN `host_', random_suffix, '` VARCHAR(255),
@@ -56,9 +66,9 @@ END //
 
 DELIMITER ;
 
-###
+-- ###
 
-CALL create_audit_table('audit', 'test.product');
+-- CALL create_audit_table('audit', 'test.product');
 
-###
+-- ###
 

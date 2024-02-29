@@ -1,13 +1,23 @@
+-- Function -->
+-- Add tables being audited to meta data table
+
+-- Run Instructions -->
+-- Run as root user within audit database created during setup
+-- Call the procedure with full table name to add it to auditing along with audit database name e.g --> call create_audit_table('audit' , 'hr.salary');
+
+-- Post run Instructions -->
+-- 
+
 DELIMITER //
 
-CREATE PROCEDURE create_audit_table(IN db_name VARCHAR(255), IN full_table_name VARCHAR(255))
+CREATE PROCEDURE audit.create_audit_table(IN db_name VARCHAR(255), IN full_table_name VARCHAR(255))
 BEGIN
     DECLARE table_name VARCHAR(255);
     DECLARE meta_db_name VARCHAR(255);
     DECLARE meta_table_name VARCHAR(255);
     DECLARE audit_table_name VARCHAR(255);
     DECLARE sql_query VARCHAR(1000);
-    DECLARE random_suffix VARCHAR(3);
+    DECLARE random_suffix VARCHAR(10);
     DECLARE current_datetime DATETIME;
 
     -- Set current datetime
@@ -19,7 +29,7 @@ BEGIN
     SET meta_table_name = SUBSTRING(full_table_name, @dot_position + 1);
 
     -- Drop the audit table if it exists
-    SET audit_table_name = CONCAT(db_name, '.audit_', meta_table_name);
+    SET audit_table_name = CONCAT(db_name, '.audit_', meta_db_name, '_', meta_table_name);
     SET @drop_query = CONCAT('DROP TABLE IF EXISTS ', audit_table_name);
     PREPARE stmt FROM @drop_query;
     EXECUTE stmt;
@@ -32,15 +42,14 @@ BEGIN
     DEALLOCATE PREPARE stmt;
 
     -- Add additional columns
-    SET random_suffix = LPAD(FLOOR(RAND() * 1000), 3, '0');
+    SET random_suffix = 'trigtrack';
 
     SET @alter_query = CONCAT('ALTER TABLE ', audit_table_name, '
         ADD COLUMN id_', random_suffix, ' INT AUTO_INCREMENT PRIMARY KEY,
-        ADD COLUMN audit_id_', random_suffix, ' INT,
         ADD COLUMN `datetime_', random_suffix, '` DATETIME,
         ADD COLUMN `user_', random_suffix, '` VARCHAR(255),
         ADD COLUMN `host_', random_suffix, '` VARCHAR(255),
-		ADD COLUMN `audit_type_', random_suffix, '` VARCHAR(255)');
+        ADD COLUMN `audit_type_', random_suffix, '` VARCHAR(255)');
     PREPARE stmt FROM @alter_query;
     EXECUTE stmt;
     DEALLOCATE PREPARE stmt;
@@ -55,10 +64,3 @@ BEGIN
 END //
 
 DELIMITER ;
-
-###
-
-CALL create_audit_table('audit', 'test.product');
-
-###
-

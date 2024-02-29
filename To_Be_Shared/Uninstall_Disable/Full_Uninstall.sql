@@ -1,0 +1,56 @@
+DELIMITER //
+
+drop procedure mysql.create_audit_database_user//
+
+CREATE PROCEDURE audit.clear_audit_database_user()
+BEGIN
+    DECLARE db_name VARCHAR(255);
+    DECLARE username VARCHAR(255);
+    DECLARE trigger_prefix VARCHAR(255);
+    DECLARE drop_trigger_query TEXT;
+
+    -- Set database, username, and trigger prefix
+    SET @db_name := 'audit';
+    SET @username := 'auditmgr';
+    SET @trigger_prefix := 'after_';
+
+    -- Drop the table
+    SET @sql_query := 'DROP TABLE IF EXISTS audit.audit_meta_data';
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    -- Drop the database
+    SET @sql_query := CONCAT('DROP DATABASE IF EXISTS ', @db_name);
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    -- Drop the user
+    SET @sql_query := CONCAT('DROP USER IF EXISTS ''', @username, '''@''%''');
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    -- Generate DROP TRIGGER statements
+    SET @sql_query := CONCAT(
+        'SELECT GROUP_CONCAT(CONCAT("DROP TRIGGER IF EXISTS ", trigger_schema, ".", trigger_name, ";") SEPARATOR " ")
+        INTO @drop_trigger_query
+        FROM information_schema.triggers
+        WHERE trigger_name LIKE "', @trigger_prefix, '%"'
+    );
+
+    PREPARE stmt FROM @sql_query;
+    EXECUTE stmt;
+    DEALLOCATE PREPARE stmt;
+
+    -- Print DROP TRIGGER statements
+    SELECT @drop_trigger_query AS drop_trigger_statements;
+
+    -- Flush privileges
+    FLUSH PRIVILEGES;
+
+    SELECT 'Database, table, triggers, and user cleared successfully.' AS result;
+END//
+
+DELIMITER ;

@@ -1,0 +1,49 @@
+-- ### Update
+
+DELIMITER //
+
+CREATE TRIGGER after_update
+AFTER UPDATE ON appdb.product
+FOR EACH ROW
+BEGIN
+    INSERT INTO audit.audit_product (id, name, category, price, qty, datetime_510, user_510, host_510, audit_type_510)
+    VALUES (OLD.id, OLD.name, OLD.category, OLD.price, OLD.qty, NOW(), USER(), @@hostname, 'UPDATE_OLD');
+
+    INSERT INTO audit.audit_product (id, name, category, price, qty, datetime_510, user_510, host_510, audit_type_510)
+    VALUES (NEW.id, NEW.name, NEW.category, NEW.price, NEW.qty, NOW(), USER(), @@hostname, 'UPDATE_NEW');
+END;
+//
+
+DELIMITER ;
+
+
+-- ### Insert
+
+DELIMITER //
+
+CREATE TRIGGER after_insert
+AFTER INSERT ON appdb.product
+FOR EACH ROW
+BEGIN
+    INSERT INTO audit.audit_product (id, name, category, price, qty, datetime_510, user_510, host_510, audit_type_510)
+    VALUES (NEW.id, NEW.name, NEW.category, NEW.price, NEW.qty, NOW(), USER(), @@hostname, 'INSERT');
+END;
+//
+
+DELIMITER ;
+
+
+-- ### Delete
+
+DELIMITER //
+
+CREATE TRIGGER after_delete
+AFTER DELETE ON appdb.product
+FOR EACH ROW
+BEGIN
+    INSERT INTO audit.audit_product (id, name, category, price, qty, datetime_510, user_510, host_510, audit_type_510)
+    VALUES (OLD.id, OLD.name, OLD.category, OLD.price, OLD.qty, NOW(), USER(), @@hostname, 'DELETE');
+END;
+//
+
+DELIMITER ;

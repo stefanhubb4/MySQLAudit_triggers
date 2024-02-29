@@ -6,12 +6,12 @@
 -- Call the procedure without any parameters, use decaled/hard-coded parameters to change any names
 
 -- Post run Instructions
--- Need to manually drop the procedure once completed
+-- Need to manually drop the procedure once completed, included in step 6
 
 
 DELIMITER //
 
-CREATE PROCEDURE create_audit_database_user()
+CREATE PROCEDURE mysql.create_audit_database_user()
 BEGIN
     DECLARE db_name VARCHAR(255);
     DECLARE username VARCHAR(255);
@@ -63,3 +63,6 @@ BEGIN
 END//
 
 DELIMITER ;
+
+
+call mysql.create_audit_database_user();
