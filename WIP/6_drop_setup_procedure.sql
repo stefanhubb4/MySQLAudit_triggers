@@ -1,0 +1,1 @@
+drop procedure mysql.create_audit_database_user;
